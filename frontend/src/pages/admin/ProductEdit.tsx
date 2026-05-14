@@ -260,7 +260,16 @@ export default function AdminProductEdit() {
               />
             )}
             {form.download_url && (
-              <p className="text-xs text-green-600 mt-1">✓ 已上传: {form.download_url}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs text-green-600">✓ 已上传: {form.download_url}</p>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, download_url: '' })}
+                  className="text-xs text-red-500 hover:text-red-700"
+                >
+                  删除
+                </button>
+              </div>
             )}
           </div>
 
