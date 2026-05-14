@@ -28,6 +28,10 @@ export default function ProductDetail() {
   const { id } = useParams()
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
+  const [code, setCode] = useState('')
+  const [downloading, setDownloading] = useState(false)
+  const [error, setError] = useState('')
+  const [showCodeInput, setShowCodeInput] = useState(false)
 
   useEffect(() => {
     loadProduct()
@@ -38,6 +42,51 @@ export default function ProductDetail() {
     const res = await fetchAPI(`/api/products/${id}`)
     setProduct(res.data || null)
     setLoading(false)
+  }
+
+  async function handleDownload() {
+    if (!code.trim()) {
+      setError('请输入激活码')
+      return
+    }
+
+    setDownloading(true)
+    setError('')
+
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || ''
+      const res = await fetch(`${API_BASE}/api/download/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code.trim() }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || '下载失败')
+        setDownloading(false)
+        return
+      }
+
+      // 下载文件
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${product?.name || 'download'}.zip`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      setCode('')
+      setShowCodeInput(false)
+      setError('')
+    } catch (err: any) {
+      setError('网络错误，请重试')
+    } finally {
+      setDownloading(false)
+    }
   }
 
   if (loading) {
@@ -101,14 +150,42 @@ export default function ProductDetail() {
             </div>
 
             <div className="space-y-3">
-              {/* 下载按钮 */}
-              {product.download_url && (
-                <a
-                  href={`/api/download/${product.id}`}
+              {/* 输入激活码下载 */}
+              {!showCodeInput ? (
+                <button
+                  onClick={() => setShowCodeInput(true)}
                   className="block w-full text-center py-3 px-6 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
                 >
-                  📥 免费下载（加密ZIP）
-                </a>
+                  📥 输入激活码下载
+                </button>
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <input
+                    type="text"
+                    value={code}
+                    onChange={(e) => { setCode(e.target.value); setError('') }}
+                    placeholder="请输入激活码"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-gray-900 text-center font-mono tracking-wider"
+                    onKeyDown={(e) => e.key === 'Enter' && handleDownload()}
+                    autoFocus
+                  />
+                  {error && (
+                    <p className="text-red-500 text-sm text-center">{error}</p>
+                  )}
+                  <button
+                    onClick={handleDownload}
+                    disabled={downloading}
+                    className="w-full py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+                  >
+                    {downloading ? '验证中...' : '确认下载'}
+                  </button>
+                  <button
+                    onClick={() => { setShowCodeInput(false); setError('') }}
+                    className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    取消
+                  </button>
+                </div>
               )}
 
               {/* 购买激活码 */}
@@ -119,14 +196,13 @@ export default function ProductDetail() {
                   rel="noopener noreferrer"
                   className="block w-full text-center py-3 px-6 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium"
                 >
-                  🔑 购买激活码（解压密码）
+                  🔑 购买激活码
                 </a>
               )}
             </div>
 
             <div className="mt-4 text-sm text-gray-400">
               <p>📊 已有 {product.download_count} 人下载</p>
-              <p className="mt-1">💡 下载后需要激活码（解压密码）才能使用</p>
             </div>
           </div>
         </div>
@@ -135,10 +211,11 @@ export default function ProductDetail() {
         <div className="border-t border-gray-200 pt-8">
           <h2 className="text-lg font-semibold mb-4">📖 使用说明</h2>
           <div className="bg-gray-50 rounded-lg p-6 space-y-3 text-sm text-gray-600">
-            <p>1. 点击「免费下载」获取加密ZIP文件</p>
-            <p>2. 点击「购买激活码」前往支付页面</p>
-            <p>3. 支付成功后自动获得激活码（即解压密码）</p>
-            <p>4. 使用激活码解压ZIP文件，即可获得完整内容</p>
+            <p>1. 点击「购买激活码」前往支付页面</p>
+            <p>2. 支付成功后自动获得激活码（一次性）</p>
+            <p>3. 回到本页面，点击「输入激活码下载」</p>
+            <p>4. 输入激活码，验证通过后自动下载文件</p>
+            <p className="text-red-400">⚠️ 每个激活码仅可使用一次，请妥善保管下载的文件</p>
           </div>
         </div>
 
