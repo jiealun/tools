@@ -244,47 +244,24 @@ export default function AdminProductEdit() {
             {uploading && <p className="text-xs text-blue-500 mt-1">上传中...</p>}
           </div>
 
-          {/* 工具文件（加密ZIP） */}
+          {/* 工具文件 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              工具文件（加密ZIP）
+              工具文件
             </label>
             {isNew ? (
               <p className="text-sm text-gray-400">请先保存产品，再上传文件</p>
             ) : (
-              <>
-                <input
-                  type="file"
-                  accept=".zip"
-                  onChange={handleFileUpload}
-                  className="text-sm"
-                  disabled={uploading}
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  上传前请先在本地用激活码作为密码加密ZIP
-                </p>
-              </>
+              <input
+                type="file"
+                onChange={handleFileUpload}
+                className="text-sm"
+                disabled={uploading}
+              />
             )}
             {form.download_url && (
               <p className="text-xs text-green-600 mt-1">✓ 已上传: {form.download_url}</p>
             )}
-          </div>
-
-          {/* 爱发卡链接 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              爱发卡购买链接
-            </label>
-            <input
-              type="url"
-              value={form.ifaka_url}
-              onChange={(e) => setForm({ ...form, ifaka_url: e.target.value })}
-              placeholder="https://www.ifaka.com/xxx"
-              className="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-gray-900"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              在爱发卡创建商品后，将购买链接粘贴到这里
-            </p>
           </div>
 
           {/* 发布状态 */}
