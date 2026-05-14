@@ -77,23 +77,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Banner */}
-      <div className="max-w-[1200px] mx-auto px-6 mb-10">
-        <div className="relative h-[184px] rounded-[32px] overflow-hidden flex items-center justify-center">
-          {/* 背景 */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-400/30 via-purple-600/20 to-pink-400/20" />
-          <div className="absolute inset-0" style={{
-            background: 'radial-gradient(ellipse at 20% 50%, rgba(132,85,239,0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 50%, rgba(96,99,238,0.2) 0%, transparent 50%)'
-          }} />
-          {/* 毛玻璃文字容器 */}
-          <div className="relative backdrop-blur-[12px] bg-white/40 border border-white/40 rounded-[40px] px-16 py-12 shadow-2xl">
-            <h1 className="text-5xl font-medium text-[#1a1b21] tracking-tight">
-              新工具上新啦
-            </h1>
-          </div>
-        </div>
-      </div>
-
       {/* 分类筛选 + 标题 */}
       <div className="max-w-[1200px] mx-auto px-6 mb-6">
         <div className="flex items-center justify-between mb-4">
@@ -170,12 +153,12 @@ export default function Home() {
                   </div>
 
                   {/* 名称 */}
-                  <h3 className="text-2xl font-semibold text-[#1a1b21] pt-3">
+                  <h3 className="text-lg font-semibold text-[#1a1b21] pt-3">
                     {product.name}
                   </h3>
 
                   {/* 简介 */}
-                  <p className="text-base text-[#494454] line-clamp-2 leading-relaxed">
+                  <p className="text-sm text-[#9a95a8] line-clamp-2 leading-relaxed">
                     {product.description}
                   </p>
                 </div>
