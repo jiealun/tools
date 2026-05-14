@@ -56,6 +56,7 @@ export default function Home() {
           <span className="text-2xl font-extrabold bg-gradient-to-r from-[#6b38d4] to-[#b10e6b] bg-clip-text text-transparent">
             RainbowTools
           </span>
+          <span className="text-base text-[#6b38d4] font-medium ml-1">彩虹工具箱</span>
         </div>
         {/* 搜索框 */}
         <div className="relative">
@@ -77,11 +78,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* 分类筛选 + 标题 */}
+      {/* 分类筛选 */}
       <div className="max-w-[1200px] mx-auto px-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[32px] font-medium text-[#1a1b21] tracking-tight">最新工具发现</h2>
-        </div>
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setActiveCategory('')}
