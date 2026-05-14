@@ -197,16 +197,51 @@ export default function AdminProductEdit() {
           {/* 封面图 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">封面图</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleCoverUpload}
-              className="text-sm"
-              disabled={uploading}
-            />
-            {form.cover_url && (
-              <p className="text-xs text-green-600 mt-1">✓ 已上传: {form.cover_url}</p>
-            )}
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-purple-400 transition relative"
+              onPaste={async (e) => {
+                const items = e.clipboardData?.items
+                if (!items) return
+                for (let i = 0; i < items.length; i++) {
+                  if (items[i].type.startsWith('image/')) {
+                    e.preventDefault()
+                    const file = items[i].getAsFile()
+                    if (!file) return
+                    setUploading(true)
+                    setMessage('')
+                    const formData = new FormData()
+                    formData.append('file', file)
+                    try {
+                      const res = await fetchAPI('/api/upload/cover', { method: 'POST', body: formData })
+                      if (res.url) {
+                        setForm({ ...form, cover_url: res.url })
+                        setMessage('封面上传成功')
+                      }
+                    } catch (err: any) {
+                      setMessage('上传失败: ' + err.message)
+                    } finally {
+                      setUploading(false)
+                    }
+                    return
+                  }
+                }
+              }}
+              tabIndex={0}
+            >
+              {form.cover_url ? (
+                <img src={form.cover_url} alt="封面预览" className="max-h-[160px] mx-auto rounded-lg" />
+              ) : (
+                <p className="text-sm text-gray-400">点击选择文件，或 Cmd+V 粘贴图片</p>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCoverUpload}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                disabled={uploading}
+              />
+            </div>
+            {uploading && <p className="text-xs text-blue-500 mt-1">上传中...</p>}
           </div>
 
           {/* 工具文件（加密ZIP） */}
