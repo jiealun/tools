@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { fetchAPI, isLoggedIn } from '../../lib/api'
+import MarkdownEditor from '../../components/MarkdownEditor'
 
 interface ProductForm {
   name: string
@@ -174,12 +175,10 @@ export default function AdminProductEdit() {
 
           {/* 简介 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">产品简介</label>
-            <textarea
+            <label className="block text-sm font-medium text-gray-700 mb-1">产品简介（支持Markdown）</label>
+            <MarkdownEditor
               value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              rows={4}
-              className="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-gray-900"
+              onChange={(val) => setForm({ ...form, description: val })}
             />
           </div>
 

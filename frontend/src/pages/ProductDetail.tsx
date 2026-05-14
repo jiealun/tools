@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { fetchAPI } from '../lib/api'
+import Markdown from 'react-markdown'
 
 interface Product {
   id: string
@@ -93,7 +94,6 @@ export default function ProductDetail() {
               {categoryLabels[product.category] || product.category}
             </span>
             <h1 className="text-2xl font-bold text-gray-900 mt-3 mb-2">{product.name}</h1>
-            <p className="text-gray-500 mb-4">{product.description}</p>
 
             <div className="mb-6">
               <span className="text-3xl font-bold text-orange-500">¥{product.price}</span>
@@ -141,6 +141,16 @@ export default function ProductDetail() {
             <p>4. 使用激活码解压ZIP文件，即可获得完整内容</p>
           </div>
         </div>
+
+        {/* 产品详细介绍 */}
+        {product.description && (
+          <div className="border-t border-gray-200 pt-8 mt-8">
+            <h2 className="text-lg font-semibold mb-4">📝 详细介绍</h2>
+            <div className="prose prose-sm max-w-none">
+              <Markdown>{product.description}</Markdown>
+            </div>
+          </div>
+        )}
 
         {/* 截图展示 */}
         {product.screenshots && product.screenshots.length > 0 && (
