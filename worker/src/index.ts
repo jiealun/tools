@@ -6,7 +6,6 @@ import { downloadRoute } from './routes/download'
 import { uploadRoute } from './routes/upload'
 
 export type Env = {
-  R2_BUCKET: R2Bucket
   SUPABASE_URL: string
   SUPABASE_SERVICE_KEY: string
   ADMIN_USERNAME: string

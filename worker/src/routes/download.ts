@@ -12,7 +12,7 @@ downloadRoute.get('/:productId', async (c) => {
   // 获取产品信息
   const { data: product, error } = await supabase
     .from('products')
-    .select('id, name, download_url, is_published')
+    .select('id, name, download_url, is_published, download_count')
     .eq('id', productId)
     .eq('is_published', true)
     .single()
@@ -36,24 +36,23 @@ downloadRoute.get('/:productId', async (c) => {
   })
 
   // 更新下载计数
-  // 更新下载计数
   await supabase
     .from('products')
-    .update({ download_count: (product as any).download_count + 1 })
+    .update({ download_count: (product.download_count || 0) + 1 })
     .eq('id', productId)
 
-  // 从 R2 获取文件
-  const fileKey = product.download_url
-  const object = await c.env.R2_BUCKET.get(fileKey)
+  // 从 Supabase Storage 下载文件
+  const { data: fileData, error: downloadError } = await supabase.storage
+    .from('toolbox')
+    .download(product.download_url)
 
-  if (!object) {
+  if (downloadError || !fileData) {
     return c.json({ error: '文件不存在' }, 404)
   }
 
   const headers = new Headers()
   headers.set('Content-Type', 'application/zip')
   headers.set('Content-Disposition', `attachment; filename="${encodeURIComponent(product.name)}.zip"`)
-  headers.set('Content-Length', String(object.size))
 
-  return new Response(object.body, { headers })
+  return new Response(fileData, { headers })
 })
