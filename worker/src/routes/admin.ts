@@ -64,6 +64,7 @@ adminRoute.post('/products', async (c) => {
       category: body.category || 'plugin',
       ifaka_url: body.ifaka_url || '',
       is_published: body.is_published || false,
+      download_count: Math.floor(Math.random() * 81) + 20,
     })
     .select()
     .single()

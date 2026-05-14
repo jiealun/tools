@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchAPI } from '../lib/api'
 
@@ -19,11 +19,16 @@ const categoryLabels: Record<string, string> = {
   tool: '实用工具',
 }
 
+const PAGE_SIZE = 15 // 一行3个 x 5行
+
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string>('')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const observerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadProducts()
@@ -31,6 +36,7 @@ export default function Home() {
 
   async function loadProducts() {
     setLoading(true)
+    setVisibleCount(PAGE_SIZE)
     const query = activeCategory ? `?category=${activeCategory}` : ''
     const res = await fetchAPI(`/api/products${query}`)
     setProducts(res.data || [])
@@ -44,6 +50,34 @@ export default function Home() {
           p.description.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : products
+
+  const visibleProducts = filteredProducts.slice(0, visibleCount)
+  const hasMore = visibleCount < filteredProducts.length
+
+  // 滚动加载
+  const loadMore = useCallback(() => {
+    if (!hasMore || loadingMore) return
+    setLoadingMore(true)
+    setTimeout(() => {
+      setVisibleCount((prev) => prev + PAGE_SIZE)
+      setLoadingMore(false)
+    }, 300)
+  }, [hasMore, loadingMore])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+    if (observerRef.current) {
+      observer.observe(observerRef.current)
+    }
+    return () => observer.disconnect()
+  }, [loadMore])
 
   return (
     <div className="min-h-screen" style={{
@@ -116,53 +150,53 @@ export default function Home() {
             {searchQuery ? '没有找到匹配的工具' : '暂无工具'}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredProducts.map((product) => (
-              <Link
-                key={product.id}
-                to={`/product/${product.id}`}
-                className="group backdrop-blur-[8px] bg-white/40 border border-white/20 rounded-[24px] overflow-hidden shadow-[0px_8px_32px_0px_rgba(31,38,135,0.07)] hover:shadow-[0px_12px_40px_0px_rgba(31,38,135,0.12)] hover:border-[rgba(154,119,226,0.44)] transition-all duration-300"
-              >
-                {/* 封面图 */}
-                <div className="h-[230px] rounded-[24px] overflow-hidden shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
-                  {product.cover_url ? (
-                    <img
-                      src={product.cover_url}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
-                      <span className="text-5xl">📦</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* 信息 */}
-                <div className="px-6 py-5 space-y-2">
-                  {/* 分类 + 下载量 */}
-                  <div className="flex items-center justify-between">
-                    <span className="px-3 py-1.5 bg-[#dfd9ec] text-[#525d6b] text-sm rounded-full">
-                      {categoryLabels[product.category] || product.category}
-                    </span>
-                    <span className="text-xs text-[#7c7984]">
-                      {product.download_count}人已下载
-                    </span>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {visibleProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/product/${product.id}`}
+                  className="group backdrop-blur-[8px] bg-white/40 border border-white/20 rounded-[24px] overflow-hidden shadow-[0px_8px_32px_0px_rgba(31,38,135,0.07)] hover:shadow-[0px_12px_40px_0px_rgba(31,38,135,0.12)] hover:border-[rgba(154,119,226,0.44)] transition-all duration-300"
+                >
+                  <div className="h-[230px] rounded-[24px] overflow-hidden shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
+                    {product.cover_url ? (
+                      <img
+                        src={product.cover_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                        <span className="text-5xl">📦</span>
+                      </div>
+                    )}
                   </div>
-
-                  {/* 名称 */}
-                  <h3 className="text-lg font-semibold text-[#1a1b21] pt-3">
-                    {product.name}
-                  </h3>
-
-                  {/* 简介 */}
-                  <p className="text-sm text-[#9a95a8] line-clamp-2 leading-relaxed">
-                    {product.description}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
+                  <div className="px-6 py-5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="px-3 py-1.5 bg-[#dfd9ec] text-[#525d6b] text-sm rounded-full">
+                        {categoryLabels[product.category] || product.category}
+                      </span>
+                      <span className="text-xs text-[#7c7984]">
+                        {product.download_count}人已下载
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-[#1a1b21] pt-3">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-[#9a95a8] line-clamp-2 leading-relaxed">
+                      {product.description}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            {/* 滚动加载触发器 */}
+            {hasMore && (
+              <div ref={observerRef} className="text-center py-8 text-gray-400 text-sm">
+                {loadingMore ? '加载中...' : ''}
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
