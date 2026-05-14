@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { fetchAPI } from '../lib/api'
 
 interface Props {
   value: string
@@ -8,6 +9,26 @@ interface Props {
 export default function MarkdownEditor({ value, onChange }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [preview, setPreview] = useState(false)
+  const [uploading, setUploading] = useState(false)
+
+  function insertAtCursor(text: string) {
+    const textarea = textareaRef.current
+    if (!textarea) {
+      onChange(value + text)
+      return
+    }
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const newText = value.substring(0, start) + text + value.substring(end)
+    onChange(newText)
+
+    setTimeout(() => {
+      textarea.focus()
+      textarea.selectionStart = start + text.length
+      textarea.selectionEnd = start + text.length
+    }, 0)
+  }
 
   function insertText(before: string, after: string = '') {
     const textarea = textareaRef.current
@@ -19,12 +40,77 @@ export default function MarkdownEditor({ value, onChange }: Props) {
     const newText = value.substring(0, start) + before + selected + after + value.substring(end)
     onChange(newText)
 
-    // 恢复光标位置
     setTimeout(() => {
       textarea.focus()
       textarea.selectionStart = start + before.length
       textarea.selectionEnd = start + before.length + selected.length
     }, 0)
+  }
+
+  // 粘贴图片处理
+  async function handlePaste(e: React.ClipboardEvent) {
+    const items = e.clipboardData?.items
+    if (!items) return
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      if (item.type.startsWith('image/')) {
+        e.preventDefault()
+        const file = item.getAsFile()
+        if (!file) return
+
+        setUploading(true)
+        try {
+          const formData = new FormData()
+          formData.append('file', file)
+
+          const res = await fetchAPI('/api/upload/cover', {
+            method: 'POST',
+            body: formData,
+          })
+
+          if (res.url) {
+            insertAtCursor(`![图片](${res.url})\n`)
+          } else {
+            alert('图片上传失败: ' + (res.error || '未知错误'))
+          }
+        } catch (err: any) {
+          alert('图片上传失败: ' + err.message)
+        } finally {
+          setUploading(false)
+        }
+        return
+      }
+    }
+  }
+
+  // 拖拽图片处理
+  async function handleDrop(e: React.DragEvent) {
+    const files = e.dataTransfer?.files
+    if (!files || files.length === 0) return
+
+    const file = files[0]
+    if (!file.type.startsWith('image/')) return
+
+    e.preventDefault()
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetchAPI('/api/upload/cover', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (res.url) {
+        insertAtCursor(`![图片](${res.url})\n`)
+      }
+    } catch (err: any) {
+      alert('图片上传失败: ' + err.message)
+    } finally {
+      setUploading(false)
+    }
   }
 
   const tools = [
@@ -57,6 +143,9 @@ export default function MarkdownEditor({ value, onChange }: Props) {
           </button>
         ))}
         <div className="flex-1" />
+        {uploading && (
+          <span className="text-xs text-blue-500 mr-2">上传中...</span>
+        )}
         <button
           type="button"
           onClick={() => setPreview(!preview)}
@@ -79,8 +168,11 @@ export default function MarkdownEditor({ value, onChange }: Props) {
           ref={textareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onPaste={handlePaste}
+          onDrop={handleDrop}
+          onDragOver={(e) => e.preventDefault()}
           rows={10}
-          placeholder="支持 Markdown 格式，如 **加粗**、# 标题、- 列表 等"
+          placeholder="支持 Markdown 格式，可直接 Cmd+V 粘贴图片"
           className="w-full px-4 py-3 outline-none resize-y text-sm font-mono"
         />
       )}
@@ -94,6 +186,8 @@ function simpleMarkdown(text: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    // 图片（要在链接之前处理）
+    .replace(/!\[(.+?)\]\((.+?)\)/g, '<img src="$2" alt="$1" class="rounded max-w-full" />')
     // 标题
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -105,8 +199,6 @@ function simpleMarkdown(text: string): string {
     .replace(/`(.+?)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>')
     // 链接
     .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-blue-500 underline">$1</a>')
-    // 图片
-    .replace(/!\[(.+?)\]\((.+?)\)/g, '<img src="$2" alt="$1" class="rounded max-w-full" />')
     // 引用
     .replace(/^&gt; (.+)$/gm, '<blockquote class="border-l-4 border-gray-300 pl-3 text-gray-600">$1</blockquote>')
     // 分割线
