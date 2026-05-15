@@ -91,6 +91,7 @@ export default function Home() {
             RainbowTools
           </span>
           <span className="text-base text-[#6b38d4] font-medium ml-1">彩虹工具箱</span>
+          <span className="text-xs text-[#9a95a8] ml-2">本站所有工具，一次购买，终身使用</span>
         </div>
         {/* 搜索框 */}
         <div className="relative">
