@@ -146,16 +146,14 @@ export default function ProductDetail() {
 
             <div className="mb-6">
               <span className="text-3xl font-bold text-orange-500">¥{product.price}</span>
-              {product.buy_url && (
-                <a
-                  href={product.buy_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-3 inline-block px-4 py-1.5 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition"
-                >
-                  获取激活码
-                </a>
-              )}
+              <a
+                href={product.buy_url || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-3 inline-block px-4 py-1.5 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition"
+              >
+                获取激活码
+              </a>
             </div>
 
             <div className="space-y-3">
@@ -209,8 +207,8 @@ export default function ProductDetail() {
         <div className="border-t border-gray-200 pt-8">
           <h2 className="text-lg font-semibold mb-4">📖 使用说明</h2>
           <div className="bg-gray-50 rounded-lg p-6 space-y-3 text-sm text-gray-600">
-            <p>1. 点击「购买激活码」前往支付页面</p>
-            <p>2. 支付成功后自动获得激活码（一次性）</p>
+            <p>1. 点击「获取激活码」前往购买页面下单</p>
+            <p>2. 下单后联系卖家获取激活码</p>
             <p>3. 回到本页面，点击「输入激活码下载」</p>
             <p>4. 输入激活码，验证通过后自动下载文件</p>
             <p className="text-red-400">⚠️ 每个激活码仅可使用一次，请妥善保管下载的文件</p>
