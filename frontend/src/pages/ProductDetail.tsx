@@ -249,27 +249,48 @@ export default function ProductDetail() {
   )
 }
 
-// 将文本中的 URL 自动转为可点击链接
+// 将文本中的 URL 自动转为可点击链接，Markdown图片语法渲染为图片
 function renderTextWithLinks(text: string) {
-  const urlRegex = /(https?:\/\/[^\s）)]+)/g
-  const parts = text.split(urlRegex)
+  const lines = text.split('\n')
 
-  return parts.map((part, i) => {
-    if (urlRegex.test(part)) {
+  return lines.map((line, lineIdx) => {
+    // 检查是否是 Markdown 图片语法 ![alt](url)
+    const imgMatch = line.match(/^!\[.*?\]\((.+?)\)$/)
+    if (imgMatch) {
       return (
-        <a
-          key={i}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 hover:underline break-all"
-        >
-          {part}
-        </a>
+        <img
+          key={lineIdx}
+          src={imgMatch[1]}
+          alt="图片"
+          className="rounded-lg max-w-full my-2"
+        />
       )
     }
-    // 重置 regex lastIndex
-    urlRegex.lastIndex = 0
-    return <span key={i}>{part}</span>
+
+    // 处理普通文本中的链接
+    const urlRegex = /(https?:\/\/[^\s）)]+)/g
+    const parts = line.split(urlRegex)
+
+    return (
+      <span key={lineIdx}>
+        {parts.map((part, i) => {
+          if (part.match(/^https?:\/\//)) {
+            return (
+              <a
+                key={i}
+                href={part}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline break-all"
+              >
+                {part}
+              </a>
+            )
+          }
+          return <span key={i}>{part}</span>
+        })}
+        {lineIdx < lines.length - 1 && <br />}
+      </span>
+    )
   })
 }
