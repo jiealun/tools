@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { fetchAPI, isLoggedIn } from '../../lib/api'
-import MarkdownEditor from '../../components/MarkdownEditor'
 
 interface ProductForm {
   name: string
@@ -175,11 +174,44 @@ export default function AdminProductEdit() {
 
           {/* 简介 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">产品简介（支持Markdown）</label>
-            <MarkdownEditor
+            <label className="block text-sm font-medium text-gray-700 mb-1">产品简介</label>
+            <textarea
               value={form.description}
-              onChange={(val) => setForm({ ...form, description: val })}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onPaste={async (e) => {
+                const items = e.clipboardData?.items
+                if (!items) return
+                for (let i = 0; i < items.length; i++) {
+                  if (items[i].type.startsWith('image/')) {
+                    e.preventDefault()
+                    const file = items[i].getAsFile()
+                    if (!file) return
+                    setUploading(true)
+                    const formData = new FormData()
+                    formData.append('file', file)
+                    try {
+                      const res = await fetchAPI('/api/upload/cover', { method: 'POST', body: formData })
+                      if (res.url) {
+                        const imgText = `![图片](${res.url})\n`
+                        const textarea = e.target as HTMLTextAreaElement
+                        const start = textarea.selectionStart
+                        const newVal = form.description.substring(0, start) + imgText + form.description.substring(start)
+                        setForm({ ...form, description: newVal })
+                      }
+                    } catch (err: any) {
+                      setMessage('图片上传失败: ' + err.message)
+                    } finally {
+                      setUploading(false)
+                    }
+                    return
+                  }
+                }
+              }}
+              rows={8}
+              placeholder="输入产品介绍，可直接 Cmd+V 粘贴图片"
+              className="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-gray-900 text-sm"
             />
+            {uploading && <p className="text-xs text-blue-500 mt-1">图片上传中...</p>}
           </div>
 
           {/* 价格 */}
