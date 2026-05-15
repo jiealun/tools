@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { fetchAPI } from '../lib/api'
-import Markdown from 'react-markdown'
 
 interface Product {
   id: string
@@ -223,8 +222,8 @@ export default function ProductDetail() {
         {product.description && (
           <div className="border-t border-gray-200 pt-8 mt-8">
             <h2 className="text-lg font-semibold mb-4">📝 详细介绍</h2>
-            <div className="prose prose-sm max-w-none">
-              <Markdown>{product.description}</Markdown>
+            <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+              {renderTextWithLinks(product.description)}
             </div>
           </div>
         )}
@@ -248,4 +247,29 @@ export default function ProductDetail() {
       </main>
     </div>
   )
+}
+
+// 将文本中的 URL 自动转为可点击链接
+function renderTextWithLinks(text: string) {
+  const urlRegex = /(https?:\/\/[^\s）)]+)/g
+  const parts = text.split(urlRegex)
+
+  return parts.map((part, i) => {
+    if (urlRegex.test(part)) {
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline break-all"
+        >
+          {part}
+        </a>
+      )
+    }
+    // 重置 regex lastIndex
+    urlRegex.lastIndex = 0
+    return <span key={i}>{part}</span>
+  })
 }
