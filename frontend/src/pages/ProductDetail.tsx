@@ -12,6 +12,7 @@ interface Product {
   category: string
   download_url: string
   ifaka_url: string
+  buy_url: string
   download_count: number
   created_at: string
 }
@@ -145,7 +146,16 @@ export default function ProductDetail() {
 
             <div className="mb-6">
               <span className="text-3xl font-bold text-orange-500">¥{product.price}</span>
-              <span className="text-sm text-gray-400 ml-2">/ 激活码</span>
+              {product.buy_url && (
+                <a
+                  href={product.buy_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-3 inline-block px-4 py-1.5 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition"
+                >
+                  获取激活码
+                </a>
+              )}
             </div>
 
             <div className="space-y-3">
@@ -187,17 +197,6 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* 购买激活码 */}
-              {product.ifaka_url && (
-                <a
-                  href={product.ifaka_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center py-3 px-6 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium"
-                >
-                  🔑 购买激活码
-                </a>
-              )}
             </div>
 
             <div className="mt-4 text-sm text-gray-400">

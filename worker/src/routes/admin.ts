@@ -63,6 +63,7 @@ adminRoute.post('/products', async (c) => {
       price: body.price || 0,
       category: body.category || 'plugin',
       ifaka_url: body.ifaka_url || '',
+      buy_url: body.buy_url || '',
       is_published: body.is_published || false,
       download_count: Math.floor(Math.random() * 81) + 20,
     })
@@ -90,6 +91,7 @@ adminRoute.put('/products/:id', async (c) => {
       category: body.category,
       download_url: body.download_url,
       ifaka_url: body.ifaka_url,
+      buy_url: body.buy_url,
       is_published: body.is_published,
     })
     .eq('id', id)

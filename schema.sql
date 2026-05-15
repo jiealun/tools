@@ -77,3 +77,6 @@ CREATE POLICY "Public can view published products" ON products
   FOR SELECT USING (is_published = true);
 
 -- 通过 service_role key 在 Worker 中操作所有数据（绕过 RLS）
+
+-- 添加购买链接字段（在 Supabase SQL Editor 中执行）
+ALTER TABLE products ADD COLUMN IF NOT EXISTS buy_url TEXT DEFAULT '';
