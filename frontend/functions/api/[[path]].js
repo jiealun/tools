@@ -1,5 +1,5 @@
 // Cloudflare Pages Function - 代理所有 /api/* 请求到 Worker
-const WORKER_URL = 'https://toolbox-api.710218980.workers.dev'
+const WORKER_URL = 'https://api.rainbowtools.asia'
 
 export async function onRequest(context) {
   const url = new URL(context.request.url)
