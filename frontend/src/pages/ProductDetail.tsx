@@ -163,9 +163,9 @@ export default function ProductDetail() {
               ) : payUrl ? (
                 <div className="space-y-3">
                   <div className="bg-gray-50 rounded-lg p-4 text-center">
-                    <p className="text-sm text-gray-500 mb-3">请使用支付宝扫码支付</p>
+                    <p className="text-sm text-gray-500 mb-3">请使用微信扫码支付</p>
                     <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payUrl)}`}
+                      src={payUrl}
                       alt="支付二维码"
                       className="mx-auto w-[200px] h-[200px] rounded-lg"
                     />
