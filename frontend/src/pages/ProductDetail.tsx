@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { fetchAPI } from '../lib/api'
 
@@ -11,7 +11,6 @@ interface Product {
   price: number
   category: string
   download_url: string
-  ifaka_url: string
   buy_url: string
   download_count: number
   created_at: string
@@ -28,13 +27,17 @@ export default function ProductDetail() {
   const { id } = useParams()
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
-  const [code, setCode] = useState('')
-  const [downloading, setDownloading] = useState(false)
-  const [error, setError] = useState('')
-  const [showCodeInput, setShowCodeInput] = useState(false)
+  const [paying, setPaying] = useState(false)
+  const [payUrl, setPayUrl] = useState('')
+  const [orderNo, setOrderNo] = useState('')
+  const [paid, setPaid] = useState(false)
+  const pollRef = useRef<number | null>(null)
 
   useEffect(() => {
     loadProduct()
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
   }, [id])
 
   async function loadProduct() {
@@ -44,47 +47,42 @@ export default function ProductDetail() {
     setLoading(false)
   }
 
-  async function handleDownload() {
-    if (!code.trim()) {
-      setError('请输入激活码')
-      return
-    }
-
-    setDownloading(true)
-    setError('')
-
+  async function handlePay() {
+    setPaying(true)
     try {
-      const res = await fetch(`https://api.rainbowtools.asia/api/download/${id}`, {
+      const res = await fetchAPI('/api/pay/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code.trim() }),
+        body: JSON.stringify({ productId: id }),
       })
 
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || '下载失败')
-        setDownloading(false)
+      if (res.error) {
+        alert(res.error)
+        setPaying(false)
         return
       }
 
-      // 下载文件
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${product?.name || 'download'}.zip`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+      setPayUrl(res.codeUrl || res.payUrl)
+      setOrderNo(res.orderNo)
 
-      setCode('')
-      setShowCodeInput(false)
-      setError('')
+      // 开始轮询订单状态
+      pollRef.current = window.setInterval(async () => {
+        const statusRes = await fetchAPI(`/api/pay/status/${res.orderNo}`)
+        if (statusRes.status === 'paid') {
+          setPaid(true)
+          setPayUrl('')
+          if (pollRef.current) clearInterval(pollRef.current)
+        }
+      }, 3000)
     } catch (err: any) {
-      setError('网络错误，请重试')
+      alert('创建订单失败: ' + err.message)
     } finally {
-      setDownloading(false)
+      setPaying(false)
+    }
+  }
+
+  function handleDownload() {
+    if (orderNo) {
+      window.location.href = `https://api.rainbowtools.asia/api/download/${orderNo}`
     }
   }
 
@@ -141,60 +139,54 @@ export default function ProductDetail() {
             <span className="text-sm px-3 py-1 bg-gray-100 text-gray-600 rounded-full">
               {categoryLabels[product.category] || product.category}
             </span>
-            <h1 className="text-2xl font-bold text-gray-900 mt-3 mb-2">{product.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mt-3 mb-4">{product.name}</h1>
 
-            <div className="space-y-3">
-              {/* 价格 + 获取激活码 */}
-              <div className="flex items-center gap-3">
+            <div className="space-y-4">
+              {/* 价格 */}
+              <div className="flex items-center gap-2">
                 <span className="text-3xl font-bold text-orange-500">¥{product.price}</span>
-                <a
-                  href={product.buy_url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-1.5 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition"
-                >
-                  获取激活码
-                </a>
               </div>
 
-              {/* 输入激活码下载 */}
-              {!showCodeInput ? (
-                <button
-                  onClick={() => setShowCodeInput(true)}
-                  className="block w-full text-center py-3 px-6 bg-[#6b38d4] text-white rounded-lg hover:bg-[#5a2db8] transition font-medium"
-                >
-                  📥 输入激活码下载
-                </button>
-              ) : (
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                  <input
-                    type="text"
-                    value={code}
-                    onChange={(e) => { setCode(e.target.value); setError('') }}
-                    placeholder="请输入激活码"
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-purple-400 text-center font-mono tracking-wider"
-                    onKeyDown={(e) => e.key === 'Enter' && handleDownload()}
-                    autoFocus
-                  />
-                  {error && (
-                    <p className="text-red-500 text-sm text-center">{error}</p>
-                  )}
+              {/* 支付/下载区域 */}
+              {paid ? (
+                <div className="space-y-3">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                    <p className="text-green-700 font-medium">✅ 支付成功！</p>
+                  </div>
                   <button
                     onClick={handleDownload}
-                    disabled={downloading}
-                    className="w-full py-2.5 bg-[#6b38d4] text-white rounded-lg hover:bg-[#5a2db8] transition disabled:opacity-50"
+                    className="block w-full text-center py-3 px-6 bg-[#6b38d4] text-white rounded-lg hover:bg-[#5a2db8] transition font-medium"
                   >
-                    {downloading ? '验证中...' : '确认下载'}
-                  </button>
-                  <button
-                    onClick={() => { setShowCodeInput(false); setError('') }}
-                    className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
-                  >
-                    取消
+                    📥 立即下载
                   </button>
                 </div>
+              ) : payUrl ? (
+                <div className="space-y-3">
+                  <div className="bg-gray-50 rounded-lg p-4 text-center">
+                    <p className="text-sm text-gray-500 mb-3">请使用支付宝扫码支付</p>
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payUrl)}`}
+                      alt="支付二维码"
+                      className="mx-auto w-[200px] h-[200px] rounded-lg"
+                    />
+                    <p className="text-xs text-gray-400 mt-3">支付完成后会自动跳转</p>
+                  </div>
+                  <button
+                    onClick={() => { setPayUrl(''); setOrderNo(''); if (pollRef.current) clearInterval(pollRef.current) }}
+                    className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    取消支付
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handlePay}
+                  disabled={paying}
+                  className="block w-full text-center py-3 px-6 bg-[#6b38d4] text-white rounded-lg hover:bg-[#5a2db8] transition font-medium disabled:opacity-50"
+                >
+                  {paying ? '创建订单中...' : '🔑 立即购买'}
+                </button>
               )}
-
             </div>
 
             <div className="mt-4 text-sm text-gray-400">
@@ -207,11 +199,10 @@ export default function ProductDetail() {
         <div className="border-t border-gray-200 pt-8">
           <h2 className="text-lg font-semibold mb-4">📖 使用说明</h2>
           <div className="bg-gray-50 rounded-lg p-6 space-y-3 text-sm text-gray-600">
-            <p>1. 点击「获取激活码」前往购买页面下单</p>
-            <p>2. 下单后联系卖家获取激活码</p>
-            <p>3. 回到本页面，点击「输入激活码下载」</p>
-            <p>4. 输入激活码，验证通过后自动下载文件</p>
-            <p className="text-red-400">⚠️ 每个激活码仅可使用一次，请妥善保管下载的文件</p>
+            <p>1. 点击「立即购买」，扫码支付</p>
+            <p>2. 支付成功后，页面自动显示下载按钮</p>
+            <p>3. 点击「立即下载」获取文件</p>
+            <p className="text-red-400">⚠️ 请在支付成功后及时下载，不要关闭页面</p>
           </div>
         </div>
 

@@ -80,3 +80,19 @@ CREATE POLICY "Public can view published products" ON products
 
 -- 添加购买链接字段（在 Supabase SQL Editor 中执行）
 ALTER TABLE products ADD COLUMN IF NOT EXISTS buy_url TEXT DEFAULT '';
+
+-- 订单表（虎皮椒支付）
+CREATE TABLE IF NOT EXISTS orders (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  order_no VARCHAR(64) UNIQUE NOT NULL,
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  amount DECIMAL(10,2) NOT NULL,
+  status VARCHAR(20) DEFAULT 'pending', -- pending / paid
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_orders_order_no ON orders(order_no);
+CREATE INDEX IF NOT EXISTS idx_orders_product ON orders(product_id);
+
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;

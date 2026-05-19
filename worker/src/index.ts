@@ -4,6 +4,7 @@ import { productsRoute } from './routes/products'
 import { adminRoute } from './routes/admin'
 import { downloadRoute } from './routes/download'
 import { uploadRoute } from './routes/upload'
+import { payRoute } from './routes/pay'
 
 export type Env = {
   SUPABASE_URL: string
@@ -11,6 +12,9 @@ export type Env = {
   ADMIN_USERNAME: string
   ADMIN_PASSWORD: string
   JWT_SECRET: string
+  XUNHU_APPID: string
+  XUNHU_SECRET: string
+  XUNHU_GATEWAY: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -30,5 +34,6 @@ app.route('/api/products', productsRoute)
 app.route('/api/admin', adminRoute)
 app.route('/api/download', downloadRoute)
 app.route('/api/upload', uploadRoute)
+app.route('/api/pay', payRoute)
 
 export default app
