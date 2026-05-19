@@ -106,11 +106,36 @@ export default function AdminDashboard() {
         </div>
 
         {/* 产品列表 */}
-        <div className="bg-white rounded-xl border overflow-hidden">
+        <div className="bg-white rounded-xl border overflow-x-auto">
           {filteredProducts.length === 0 ? (
             <p className="p-6 text-center text-gray-400">暂无产品</p>
           ) : (
-            <table className="w-full text-sm">
+            <div className="md:hidden space-y-3 p-4">
+              {filteredProducts.map((p) => (
+                <div key={p.id} className="border rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-sm">{p.name}</span>
+                    <span className={`px-2 py-0.5 rounded text-xs ${
+                      p.is_published ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {p.is_published ? '已发布' : '草稿'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span>{p.category}</span>
+                    <span className="text-orange-500">¥{p.price}</span>
+                    <span>{p.download_count}次下载</span>
+                  </div>
+                  <div className="flex gap-3 text-xs">
+                    <Link to={`/admin/products/${p.id}/codes`} className="text-blue-500">激活码</Link>
+                    <Link to={`/admin/products/${p.id}`} className="text-gray-500">编辑</Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {filteredProducts.length > 0 && (
+            <table className="w-full text-sm hidden md:table">
               <thead className="bg-gray-50 border-b">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">名称</th>
@@ -130,9 +155,7 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3 text-gray-500">{p.download_count}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-xs ${
-                        p.is_published
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
+                        p.is_published ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
                       }`}>
                         {p.is_published ? '已发布' : '草稿'}
                       </span>
