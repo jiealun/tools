@@ -143,24 +143,25 @@ export default function ProductDetail() {
             </span>
             <h1 className="text-2xl font-bold text-gray-900 mt-3 mb-2">{product.name}</h1>
 
-            <div className="mb-6">
-              <span className="text-3xl font-bold text-orange-500">¥{product.price}</span>
-              <a
-                href={product.buy_url || '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-3 inline-block px-4 py-1.5 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition"
-              >
-                获取激活码
-              </a>
-            </div>
-
             <div className="space-y-3">
+              {/* 价格 + 获取激活码 */}
+              <div className="flex items-center gap-3">
+                <span className="text-3xl font-bold text-orange-500">¥{product.price}</span>
+                <a
+                  href={product.buy_url || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-1.5 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition"
+                >
+                  获取激活码
+                </a>
+              </div>
+
               {/* 输入激活码下载 */}
               {!showCodeInput ? (
                 <button
                   onClick={() => setShowCodeInput(true)}
-                  className="block w-full text-center py-3 px-6 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
+                  className="block w-full text-center py-3 px-6 bg-[#6b38d4] text-white rounded-lg hover:bg-[#5a2db8] transition font-medium"
                 >
                   📥 输入激活码下载
                 </button>
@@ -171,7 +172,7 @@ export default function ProductDetail() {
                     value={code}
                     onChange={(e) => { setCode(e.target.value); setError('') }}
                     placeholder="请输入激活码"
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-gray-900 text-center font-mono tracking-wider"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-purple-400 text-center font-mono tracking-wider"
                     onKeyDown={(e) => e.key === 'Enter' && handleDownload()}
                     autoFocus
                   />
@@ -181,7 +182,7 @@ export default function ProductDetail() {
                   <button
                     onClick={handleDownload}
                     disabled={downloading}
-                    className="w-full py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+                    className="w-full py-2.5 bg-[#6b38d4] text-white rounded-lg hover:bg-[#5a2db8] transition disabled:opacity-50"
                   >
                     {downloading ? '验证中...' : '确认下载'}
                   </button>
