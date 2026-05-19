@@ -39,6 +39,7 @@ payRoute.post('/create', async (c) => {
     trade_order_id: orderNo,
     total_fee: String(product.price),
     title: product.name,
+    time: String(Math.floor(Date.now() / 1000)),
     notify_url: `https://api.rainbowtools.asia/api/pay/notify`,
     nonce_str: Math.random().toString(36).slice(2),
   }
