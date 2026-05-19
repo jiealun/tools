@@ -54,8 +54,7 @@ export default function ProductDetail() {
     setError('')
 
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || ''
-      const res = await fetch(`${API_BASE}/api/download/${id}`, {
+      const res = await fetch(`https://api.rainbowtools.asia/api/download/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: code.trim() }),

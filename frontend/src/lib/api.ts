@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || ''
+const API_BASE = 'https://api.rainbowtools.asia'
 
 export async function fetchAPI(path: string, options?: RequestInit) {
   const token = localStorage.getItem('admin_token')
