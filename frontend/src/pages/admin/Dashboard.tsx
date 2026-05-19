@@ -161,7 +161,6 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right space-x-2">
-                      <Link to={`/admin/products/${p.id}/codes`} className="text-blue-500 hover:underline">激活码</Link>
                       <Link to={`/admin/products/${p.id}`} className="text-gray-500 hover:underline">编辑</Link>
                     </td>
                   </tr>

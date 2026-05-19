@@ -159,19 +159,6 @@ export default function AdminProductEdit() {
             />
           </div>
 
-          {/* 购买链接 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">购买链接（闲鱼/其他）</label>
-            <input
-              type="url"
-              value={form.buy_url}
-              onChange={(e) => setForm({ ...form, buy_url: e.target.value })}
-              placeholder="https://m.tb.cn/xxx 或闲鱼商品链接"
-              className="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-gray-900"
-            />
-            <p className="text-xs text-gray-400 mt-1">用户点击"获取激活码"会跳转到这个链接</p>
-          </div>
-
           {/* 分类 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>

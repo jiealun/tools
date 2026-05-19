@@ -47,9 +47,28 @@ downloadRoute.get('/:orderNo', async (c) => {
     return c.json({ error: '文件不存在' }, 404)
   }
 
+  // 获取原始文件扩展名
+  const ext = product.download_url.split('.').pop() || 'zip'
+  const fileName = `${product.name}.${ext}`
+
+  // 根据扩展名设置 Content-Type
+  const mimeTypes: Record<string, string> = {
+    zip: 'application/zip',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    mp4: 'video/mp4',
+    crx: 'application/x-chrome-extension',
+  }
+  const contentType = mimeTypes[ext] || 'application/octet-stream'
+
   const headers = new Headers()
-  headers.set('Content-Type', 'application/zip')
-  headers.set('Content-Disposition', `attachment; filename="${encodeURIComponent(product.name)}.zip"`)
+  headers.set('Content-Type', contentType)
+  headers.set('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`)
 
   return new Response(fileData, { headers })
 })
