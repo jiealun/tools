@@ -84,37 +84,39 @@ export default function Home() {
       background: 'linear-gradient(140deg, #f4f3fb 0%, #e9ddff 100%)'
     }}>
       {/* 顶部导航 */}
-      <header className="max-w-[1200px] mx-auto px-6 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-3xl">🦄</span>
-          <span className="text-2xl font-extrabold bg-gradient-to-r from-[#6b38d4] to-[#b10e6b] bg-clip-text text-transparent">
+      <header className="max-w-[1200px] mx-auto px-4 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center gap-3 md:justify-between">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-2xl md:text-3xl">🦄</span>
+          <span className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-[#6b38d4] to-[#b10e6b] bg-clip-text text-transparent">
             RainbowTools
           </span>
-          <span className="text-base text-[#6b38d4] font-medium ml-1">彩虹工具箱</span>
-          <span className="text-xs text-[#9a95a8] ml-2">本站所有工具，一次购买，终身使用</span>
+          <span className="text-sm text-[#6b38d4] font-medium">彩虹工具箱</span>
         </div>
-        {/* 搜索框 */}
-        <div className="relative">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="搜索工具..."
-            className="w-[256px] h-[40px] pl-6 pr-10 rounded-full bg-[#f4f3fb] backdrop-blur-sm text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-300 transition"
-          />
-          <svg
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+        <div className="flex items-center gap-3">
+          <span className="hidden md:inline text-xs text-[#9a95a8]">本站所有工具，一次购买，终身使用</span>
+          {/* 搜索框 */}
+          <div className="relative flex-1 md:flex-none">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="搜索工具..."
+              className="w-full md:w-[256px] h-[40px] pl-4 md:pl-6 pr-10 rounded-full bg-[#f4f3fb] backdrop-blur-sm text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-300 transition"
+            />
+            <svg
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
         </div>
       </header>
 
       {/* 分类筛选 */}
-      <div className="max-w-[1200px] mx-auto px-6 mb-6">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-6 mb-6">
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setActiveCategory('')}
@@ -143,7 +145,7 @@ export default function Home() {
       </div>
 
       {/* 产品列表 */}
-      <main className="max-w-[1200px] mx-auto px-6 pb-20">
+      <main className="max-w-[1200px] mx-auto px-4 md:px-6 pb-20">
         {loading ? (
           <div className="text-center py-20 text-gray-400">加载中...</div>
         ) : filteredProducts.length === 0 ? (
