@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowUpRightIcon, BoxIcon, BrandMark, SearchIcon } from '../components/SiteIcons'
 import HomeBackdrop from '../components/HomeBackdrop'
 import { fetchAPI } from '../lib/api'
+import { getPublicDownloadCount } from '../lib/displayMetrics'
 
 interface Product {
   id: string
@@ -166,7 +167,9 @@ export default function Home() {
                       <span className="category-chip">
                         {categoryLabels[product.category] || product.category}
                       </span>
-                      <span className="download-count">{product.download_count}人已下载</span>
+                      <span className="download-count">
+                        {getPublicDownloadCount(product.download_count)}人已下载
+                      </span>
                     </div>
                     <h2>{product.name}</h2>
                     <p>{product.description}</p>

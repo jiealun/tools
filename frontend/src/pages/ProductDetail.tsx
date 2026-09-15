@@ -13,6 +13,7 @@ import {
   KeyIcon,
 } from '../components/SiteIcons'
 import { fetchAPI } from '../lib/api'
+import { getPublicDownloadCount } from '../lib/displayMetrics'
 
 interface Product {
   id: string
@@ -188,7 +189,7 @@ export default function ProductDetail() {
 
             <div className="detail-stat">
               <ChartIcon />
-              <p>已有 {product.download_count} 人下载</p>
+              <p>已有 {getPublicDownloadCount(product.download_count)} 人下载</p>
             </div>
           </div>
         </section>
