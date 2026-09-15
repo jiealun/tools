@@ -1,5 +1,7 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowUpRightIcon, BoxIcon, BrandMark, SearchIcon } from '../components/SiteIcons'
+import HomeBackdrop from '../components/HomeBackdrop'
 import { fetchAPI } from '../lib/api'
 
 interface Product {
@@ -80,51 +82,45 @@ export default function Home() {
   }, [loadMore])
 
   return (
-    <div className="min-h-screen" style={{
-      background: 'linear-gradient(140deg, #f4f3fb 0%, #e9ddff 100%)'
-    }}>
-      {/* 顶部导航 */}
-      <header className="max-w-[1200px] mx-auto px-4 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center gap-3 md:justify-between">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-2xl md:text-3xl">🦄</span>
-          <span className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-[#6b38d4] to-[#b10e6b] bg-clip-text text-transparent">
-            RainbowTools
-          </span>
-          <span className="text-sm text-[#6b38d4] font-medium">彩虹工具箱</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="hidden md:inline text-xs text-[#9a95a8]">本站所有工具，一次购买，终身使用</span>
-          {/* 搜索框 */}
-          <div className="relative flex-1 md:flex-none">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="搜索工具..."
-              className="w-full md:w-[256px] h-[40px] pl-4 md:pl-6 pr-10 rounded-full bg-[#f4f3fb] backdrop-blur-sm text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-300 transition"
-            />
-            <svg
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+    <div className="site-page home-page">
+      <div className="ambient-glow ambient-glow--top" aria-hidden="true" />
+      <div className="ambient-glow ambient-glow--side" aria-hidden="true" />
+      <div className="dot-field" aria-hidden="true" />
+      <HomeBackdrop />
+
+      <header className="site-header">
+        <div className="site-header__inner">
+          <div className="brand-lockup">
+            <BrandMark className="brand-mark" />
+            <div className="brand-copy">
+              <span className="brand-name">RainbowTools</span>
+              <span className="brand-subtitle">彩虹工具箱</span>
+            </div>
+          </div>
+
+          <div className="site-header__actions">
+            <span className="site-note">本站所有工具，一次购买，终身使用</span>
+            <div className="search-field">
+              <label htmlFor="tool-search" className="sr-only">搜索工具</label>
+              <input
+                id="tool-search"
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="搜索工具..."
+              />
+              <SearchIcon className="search-field__icon" />
+            </div>
           </div>
         </div>
       </header>
 
-      {/* 分类筛选 */}
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 mb-6">
-        <div className="flex gap-2 flex-wrap">
+      <main className="page-container home-main">
+        <nav className="category-list" aria-label="工具分类">
           <button
             onClick={() => setActiveCategory('')}
-            className={`px-4 py-2 rounded-full text-sm transition backdrop-blur-sm ${
-              activeCategory === ''
-                ? 'bg-[#6b38d4] text-white shadow-lg shadow-purple-300/30'
-                : 'bg-white/40 text-[#525d6b] hover:bg-white/60 border border-white/20'
-            }`}
+            className={activeCategory === '' ? 'is-active' : ''}
+            aria-pressed={activeCategory === ''}
           >
             全部
           </button>
@@ -132,70 +128,55 @@ export default function Home() {
             <button
               key={key}
               onClick={() => setActiveCategory(key)}
-              className={`px-4 py-2 rounded-full text-sm transition backdrop-blur-sm ${
-                activeCategory === key
-                  ? 'bg-[#6b38d4] text-white shadow-lg shadow-purple-300/30'
-                  : 'bg-white/40 text-[#525d6b] hover:bg-white/60 border border-white/20'
-              }`}
+              className={activeCategory === key ? 'is-active' : ''}
+              aria-pressed={activeCategory === key}
             >
               {label}
             </button>
           ))}
-        </div>
-      </div>
+        </nav>
 
-      {/* 产品列表 */}
-      <main className="max-w-[1200px] mx-auto px-4 md:px-6 pb-20">
         {loading ? (
-          <div className="text-center py-20 text-gray-400">加载中...</div>
+          <div className="empty-state">加载中...</div>
         ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
-            {searchQuery ? '没有找到匹配的工具' : '暂无工具'}
+          <div className="empty-state">
+            <BoxIcon className="empty-state__icon" />
+            <span>{searchQuery ? '没有找到匹配的工具' : '暂无工具'}</span>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="product-grid">
               {visibleProducts.map((product) => (
-                <Link
-                  key={product.id}
-                  to={`/product/${product.id}`}
-                  className="group backdrop-blur-[8px] bg-white/40 border border-white/20 rounded-[24px] overflow-hidden shadow-[0px_8px_32px_0px_rgba(31,38,135,0.07)] hover:shadow-[0px_12px_40px_0px_rgba(31,38,135,0.12)] hover:border-[rgba(154,119,226,0.44)] transition-all duration-300"
-                >
-                  <div className="h-[230px] rounded-[24px] overflow-hidden shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
+                <Link key={product.id} to={`/product/${product.id}`} className="product-card">
+                  <div className="product-card__visual">
                     {product.cover_url ? (
-                      <img
-                        src={product.cover_url}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                      <img src={product.cover_url} alt={product.name} />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
-                        <span className="text-5xl">📦</span>
+                      <div className="product-card__placeholder">
+                        <BoxIcon />
                       </div>
                     )}
+                    <span className="product-card__arrow" aria-hidden="true">
+                      <ArrowUpRightIcon />
+                    </span>
                   </div>
-                  <div className="px-6 py-5 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="px-3 py-1.5 bg-[#dfd9ec] text-[#525d6b] text-sm rounded-full">
+
+                  <div className="product-card__body">
+                    <div className="product-card__meta">
+                      <span className="category-chip">
                         {categoryLabels[product.category] || product.category}
                       </span>
-                      <span className="text-xs text-[#7c7984]">
-                        {product.download_count}人已下载
-                      </span>
+                      <span className="download-count">{product.download_count}人已下载</span>
                     </div>
-                    <h3 className="text-lg font-semibold text-[#1a1b21] pt-3">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-[#9a95a8] line-clamp-2 leading-relaxed">
-                      {product.description}
-                    </p>
+                    <h2>{product.name}</h2>
+                    <p>{product.description}</p>
                   </div>
                 </Link>
               ))}
             </div>
-            {/* 滚动加载触发器 */}
+
             {hasMore && (
-              <div ref={observerRef} className="text-center py-8 text-gray-400 text-sm">
+              <div ref={observerRef} className="load-more-status" aria-live="polite">
                 {loadingMore ? '加载中...' : ''}
               </div>
             )}

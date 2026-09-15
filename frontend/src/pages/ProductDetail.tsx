@@ -1,5 +1,17 @@
-import { useEffect, useState, useRef } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import {
+  ArrowLeftIcon,
+  BookIcon,
+  BoxIcon,
+  BrandMark,
+  ChartIcon,
+  CheckIcon,
+  DocumentIcon,
+  DownloadIcon,
+  ImageIcon,
+  KeyIcon,
+} from '../components/SiteIcons'
 import { fetchAPI } from '../lib/api'
 
 interface Product {
@@ -86,151 +98,140 @@ export default function ProductDetail() {
     }
   }
 
+  function cancelPayment() {
+    setPayUrl('')
+    setOrderNo('')
+    if (pollRef.current) clearInterval(pollRef.current)
+  }
+
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">
-        加载中...
-      </div>
-    )
+    return <div className="site-page centered-state">加载中...</div>
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <p className="text-gray-400 mb-4">产品不存在</p>
-        <Link to="/" className="text-blue-500 hover:underline">返回首页</Link>
+      <div className="site-page centered-state">
+        <BoxIcon className="centered-state__icon" />
+        <p>产品不存在</p>
+        <Link to="/" className="text-link">返回首页</Link>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <Link to="/" className="text-gray-500 hover:text-gray-900 text-sm">
-            ← 返回工具列表
+    <div className="site-page detail-page">
+      <div className="ambient-glow ambient-glow--top" aria-hidden="true" />
+      <div className="ambient-glow ambient-glow--side" aria-hidden="true" />
+      <div className="dot-field" aria-hidden="true" />
+
+      <header className="site-header detail-header">
+        <div className="site-header__inner">
+          <Link to="/" className="brand-lockup" aria-label="RainbowTools 首页">
+            <BrandMark className="brand-mark" />
+            <div className="brand-copy">
+              <span className="brand-name">RainbowTools</span>
+              <span className="brand-subtitle">彩虹工具箱</span>
+            </div>
+          </Link>
+          <Link to="/" className="back-link">
+            <ArrowLeftIcon />
+            <span>返回工具列表</span>
           </Link>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* 产品头部 */}
-        <div className="flex flex-col md:flex-row gap-8 mb-8">
-          {/* 封面 */}
-          <div className="md:w-1/2">
-            <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden">
-              {product.cover_url ? (
-                <img
-                  src={product.cover_url}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-6xl">
-                  📦
-                </div>
-              )}
-            </div>
+      <main className="page-container detail-main">
+        <section className="detail-hero">
+          <div className="detail-cover">
+            {product.cover_url ? (
+              <img src={product.cover_url} alt={product.name} />
+            ) : (
+              <div className="detail-cover__placeholder"><BoxIcon /></div>
+            )}
           </div>
 
-          {/* 信息 */}
-          <div className="md:w-1/2">
-            <span className="text-sm px-3 py-1 bg-gray-100 text-gray-600 rounded-full">
-              {categoryLabels[product.category] || product.category}
-            </span>
-            <h1 className="text-2xl font-bold text-gray-900 mt-3 mb-4">{product.name}</h1>
+          <div className="detail-summary">
+            <span className="category-chip">{categoryLabels[product.category] || product.category}</span>
+            <h1>{product.name}</h1>
+            <div className="price-row">
+              <span className="price">¥{product.price}</span>
+            </div>
 
-            <div className="space-y-4">
-              {/* 价格 */}
-              <div className="flex items-center gap-2">
-                <span className="text-3xl font-bold text-orange-500">¥{product.price}</span>
-              </div>
-
-              {/* 支付/下载区域 */}
+            <div className="purchase-panel">
               {paid ? (
-                <div className="space-y-3">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-                    <p className="text-green-700 font-medium">✅ 支付成功！</p>
+                <div className="purchase-flow">
+                  <div className="payment-success">
+                    <CheckIcon />
+                    <p>支付成功！</p>
                   </div>
-                  <button
-                    onClick={handleDownload}
-                    className="block w-full text-center py-3 px-6 bg-[#6b38d4] text-white rounded-lg hover:bg-[#5a2db8] transition font-medium"
-                  >
-                    📥 立即下载
+                  <button onClick={handleDownload} className="primary-button">
+                    <DownloadIcon />
+                    <span>立即下载</span>
                   </button>
                 </div>
               ) : payUrl ? (
-                <div className="space-y-3">
-                  <div className="bg-gray-50 rounded-lg p-4 text-center">
-                    <p className="text-sm text-gray-500 mb-3">请使用微信扫码支付</p>
-                    <img
-                      src={payUrl}
-                      alt="支付二维码"
-                      className="mx-auto w-[200px] h-[200px] rounded-lg"
-                    />
-                    <p className="text-xs text-gray-400 mt-3">支付完成后会自动跳转</p>
+                <div className="purchase-flow">
+                  <div className="qr-panel">
+                    <p>请使用微信扫码支付</p>
+                    <img src={payUrl} alt="支付二维码" />
+                    <span>支付完成后会自动跳转</span>
                   </div>
-                  <button
-                    onClick={() => { setPayUrl(''); setOrderNo(''); if (pollRef.current) clearInterval(pollRef.current) }}
-                    className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
-                  >
-                    取消支付
-                  </button>
+                  <button onClick={cancelPayment} className="text-button">取消支付</button>
                 </div>
               ) : (
-                <button
-                  onClick={handlePay}
-                  disabled={paying}
-                  className="block w-full text-center py-3 px-6 bg-[#6b38d4] text-white rounded-lg hover:bg-[#5a2db8] transition font-medium disabled:opacity-50"
-                >
-                  {paying ? '创建订单中...' : '🔑 立即购买'}
+                <button onClick={handlePay} disabled={paying} className="primary-button">
+                  <KeyIcon />
+                  <span>{paying ? '创建订单中...' : '立即购买'}</span>
                 </button>
               )}
             </div>
 
-            <div className="mt-4 text-sm text-gray-400">
-              <p>📊 已有 {product.download_count} 人下载</p>
+            <div className="detail-stat">
+              <ChartIcon />
+              <p>已有 {product.download_count} 人下载</p>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* 使用说明 */}
-        <div className="border-t border-gray-200 pt-8">
-          <h2 className="text-lg font-semibold mb-4">📖 使用说明</h2>
-          <div className="bg-gray-50 rounded-lg p-6 space-y-3 text-sm text-gray-600">
-            <p>1. 点击「立即购买」，扫码支付</p>
-            <p>2. 支付成功后，页面自动显示下载按钮</p>
-            <p>3. 点击「立即下载」获取文件</p>
-            <p className="text-red-400">⚠️ 请在支付成功后及时下载，不要关闭页面</p>
-          </div>
-        </div>
-
-        {/* 产品详细介绍 */}
-        {product.description && (
-          <div className="border-t border-gray-200 pt-8 mt-8">
-            <h2 className="text-lg font-semibold mb-4">📝 详细介绍</h2>
-            <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-              {renderTextWithLinks(product.description)}
+        <div className="detail-content-grid">
+          <section className="content-section instruction-section">
+            <div className="section-heading">
+              <span className="section-heading__icon"><BookIcon /></span>
+              <h2>使用说明</h2>
             </div>
-          </div>
-        )}
+            <div className="instruction-list">
+              <p>1. 点击「立即购买」，扫码支付</p>
+              <p>2. 支付成功后，页面自动显示下载按钮</p>
+              <p>3. 点击「立即下载」获取文件</p>
+              <p className="instruction-warning">请在支付成功后及时下载，不要关闭页面</p>
+            </div>
+          </section>
 
-        {/* 截图展示 */}
+          {product.description && (
+            <section className="content-section description-section">
+              <div className="section-heading">
+                <span className="section-heading__icon"><DocumentIcon /></span>
+                <h2>详细介绍</h2>
+              </div>
+              <div className="rich-description">
+                {renderTextWithLinks(product.description)}
+              </div>
+            </section>
+          )}
+        </div>
+
         {product.screenshots && product.screenshots.length > 0 && (
-          <div className="border-t border-gray-200 pt-8 mt-8">
-            <h2 className="text-lg font-semibold mb-4">🖼️ 预览截图</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="content-section screenshots-section">
+            <div className="section-heading">
+              <span className="section-heading__icon"><ImageIcon /></span>
+              <h2>预览截图</h2>
+            </div>
+            <div className="screenshot-grid">
               {product.screenshots.map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt={`截图 ${i + 1}`}
-                  className="rounded-lg border border-gray-200"
-                />
+                <img key={i} src={url} alt={`截图 ${i + 1}`} />
               ))}
             </div>
-          </div>
+          </section>
         )}
       </main>
     </div>
@@ -245,14 +246,7 @@ function renderTextWithLinks(text: string) {
     // 检查是否是 Markdown 图片语法 ![alt](url)
     const imgMatch = line.match(/^!\[.*?\]\((.+?)\)$/)
     if (imgMatch) {
-      return (
-        <img
-          key={lineIdx}
-          src={imgMatch[1]}
-          alt="图片"
-          className="rounded-lg max-w-full my-2"
-        />
-      )
+      return <img key={lineIdx} src={imgMatch[1]} alt="图片" className="rich-description__image" />
     }
 
     // 处理普通文本中的链接
@@ -264,13 +258,7 @@ function renderTextWithLinks(text: string) {
         {parts.map((part, i) => {
           if (part.match(/^https?:\/\//)) {
             return (
-              <a
-                key={i}
-                href={part}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline break-all"
-              >
+              <a key={i} href={part} target="_blank" rel="noopener noreferrer">
                 {part}
               </a>
             )
