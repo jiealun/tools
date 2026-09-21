@@ -5,6 +5,7 @@ import { adminRoute } from './routes/admin'
 import { downloadRoute } from './routes/download'
 import { uploadRoute } from './routes/upload'
 import { payRoute } from './routes/pay'
+import { supportRoute } from './routes/support'
 
 export type Env = {
   SUPABASE_URL: string
@@ -22,7 +23,7 @@ const app = new Hono<{ Bindings: Env }>()
 // CORS
 app.use('*', cors({
   origin: '*',
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }))
 
@@ -35,5 +36,6 @@ app.route('/api/admin', adminRoute)
 app.route('/api/download', downloadRoute)
 app.route('/api/upload', uploadRoute)
 app.route('/api/pay', payRoute)
+app.route('/api/support', supportRoute)
 
 export default app

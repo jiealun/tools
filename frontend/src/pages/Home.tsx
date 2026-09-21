@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRightIcon, BoxIcon, BrandMark, SearchIcon } from '../components/SiteIcons'
 import HomeBackdrop from '../components/HomeBackdrop'
+import CustomerSupportWidget from '../components/CustomerSupportWidget'
 import { fetchAPI } from '../lib/api'
 import { getPublicDownloadCount } from '../lib/displayMetrics'
 
@@ -186,6 +187,8 @@ export default function Home() {
           </>
         )}
       </main>
+
+      <CustomerSupportWidget />
     </div>
   )
 }

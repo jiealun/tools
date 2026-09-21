@@ -96,3 +96,34 @@ CREATE INDEX IF NOT EXISTS idx_orders_order_no ON orders(order_no);
 CREATE INDEX IF NOT EXISTS idx_orders_product ON orders(product_id);
 
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+-- 客服会话与消息
+CREATE TABLE IF NOT EXISTS support_conversations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  visitor_token VARCHAR(128) NOT NULL UNIQUE,
+  page_url TEXT,
+  status VARCHAR(20) NOT NULL DEFAULT 'open', -- open / closed
+  last_message_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS support_messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  conversation_id UUID NOT NULL REFERENCES support_conversations(id) ON DELETE CASCADE,
+  sender_type VARCHAR(20) NOT NULL, -- visitor / agent / system
+  body TEXT,
+  attachment_url TEXT,
+  attachment_name VARCHAR(255),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT support_messages_has_content CHECK (NULLIF(BTRIM(COALESCE(body, '')), '') IS NOT NULL OR attachment_url IS NOT NULL)
+);
+
+CREATE INDEX IF NOT EXISTS idx_support_conversations_status_time
+  ON support_conversations(status, last_message_at DESC);
+CREATE INDEX IF NOT EXISTS idx_support_messages_conversation_time
+  ON support_messages(conversation_id, created_at ASC);
+
+ALTER TABLE support_conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE support_messages ENABLE ROW LEVEL SECURITY;
+
+-- 访客消息统一经过 Worker 写入，Worker 使用 service_role key 绕过 RLS。

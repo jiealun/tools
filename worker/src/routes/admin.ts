@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { Env } from '../index'
 import { getSupabase } from '../lib/supabase'
 import { signToken, authMiddleware } from '../lib/auth'
+import { MAX_MESSAGE_LENGTH } from './support'
 
 export const adminRoute = new Hono<{ Bindings: Env }>()
 
@@ -187,4 +188,84 @@ adminRoute.get('/stats', async (c) => {
     usedCodes,
     totalDownloads: downloads.count || 0,
   })
+})
+
+// 客服会话列表
+adminRoute.get('/support/conversations', async (c) => {
+  const supabase = getSupabase(c.env.SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY)
+  const { data, error } = await supabase
+    .from('support_conversations')
+    .select('*')
+    .order('last_message_at', { ascending: false })
+    .limit(100)
+
+  if (error) return c.json({ error: error.message }, 500)
+
+  const conversations = await Promise.all((data || []).map(async (conversation) => {
+    const latest = await supabase
+      .from('support_messages')
+      .select('body, attachment_url, sender_type, created_at')
+      .eq('conversation_id', conversation.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    return { ...conversation, latest_message: latest.data || null }
+  }))
+
+  return c.json({ data: conversations })
+})
+
+// 客服查看单个会话消息
+adminRoute.get('/support/conversations/:id/messages', async (c) => {
+  const supabase = getSupabase(c.env.SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY)
+  const { data, error } = await supabase
+    .from('support_messages')
+    .select('*')
+    .eq('conversation_id', c.req.param('id'))
+    .order('created_at', { ascending: true })
+
+  if (error) return c.json({ error: error.message }, 500)
+  return c.json({ data: data || [] })
+})
+
+// 客服回复消息
+adminRoute.post('/support/conversations/:id/messages', async (c) => {
+  const body = await c.req.json<{ text?: string }>()
+  const text = typeof body.text === 'string' ? body.text.trim() : ''
+  if (!text) return c.json({ error: '回复内容不能为空' }, 400)
+  if (text.length > MAX_MESSAGE_LENGTH) return c.json({ error: '消息不能超过 5000 个字符' }, 400)
+
+  const supabase = getSupabase(c.env.SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY)
+  const id = c.req.param('id')
+  const { data, error } = await supabase
+    .from('support_messages')
+    .insert({ conversation_id: id, sender_type: 'agent', body: text })
+    .select()
+    .single()
+
+  if (error) return c.json({ error: error.message }, 500)
+  await supabase
+    .from('support_conversations')
+    .update({ last_message_at: new Date().toISOString(), status: 'open' })
+    .eq('id', id)
+
+  return c.json({ data })
+})
+
+// 关闭或重新打开会话
+adminRoute.patch('/support/conversations/:id', async (c) => {
+  const body = await c.req.json<{ status?: string }>()
+  if (body.status !== 'open' && body.status !== 'closed') return c.json({ error: '会话状态无效' }, 400)
+
+  const supabase = getSupabase(c.env.SUPABASE_URL, c.env.SUPABASE_SERVICE_KEY)
+  const { data, error } = await supabase
+    .from('support_conversations')
+    .update({ status: body.status })
+    .eq('id', c.req.param('id'))
+    .select()
+    .single()
+
+  if (error) return c.json({ error: error.message }, 500)
+  return c.json({ data })
 })

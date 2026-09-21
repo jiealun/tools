@@ -14,6 +14,7 @@ import {
 } from '../components/SiteIcons'
 import { fetchAPI } from '../lib/api'
 import { getPublicDownloadCount } from '../lib/displayMetrics'
+import CustomerSupportWidget from '../components/CustomerSupportWidget'
 
 interface Product {
   id: string
@@ -235,6 +236,8 @@ export default function ProductDetail() {
           </section>
         )}
       </main>
+
+      <CustomerSupportWidget />
     </div>
   )
 }

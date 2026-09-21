@@ -10,6 +10,9 @@
    - Project URL: `https://xxx.supabase.co`
    - Service Role Key: `eyJxxx...`（在 Settings → API 中找到）
 
+如果线上数据库已经初始化过 `schema.sql`，请在 Supabase SQL Editor 单独执行项目根目录的 `support-migration.sql`。
+同时确认 `toolbox` Storage bucket 已开启公开读取权限，客服截图上传后才能在访客和后台消息中直接预览。
+
 ### 2. Cloudflare 设置
 
 1. 登录 [dash.cloudflare.com](https://dash.cloudflare.com)

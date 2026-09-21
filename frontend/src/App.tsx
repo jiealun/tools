@@ -6,6 +6,7 @@ import AdminDashboard from './pages/admin/Dashboard'
 import AdminProducts from './pages/admin/Products'
 import AdminProductEdit from './pages/admin/ProductEdit'
 import AdminCodes from './pages/admin/Codes'
+import AdminSupport from './pages/admin/Support'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
       <Route path="/admin/products/new" element={<AdminProductEdit />} />
       <Route path="/admin/products/:id" element={<AdminProductEdit />} />
       <Route path="/admin/products/:id/codes" element={<AdminCodes />} />
+      <Route path="/admin/support" element={<AdminSupport />} />
     </Routes>
   )
 }

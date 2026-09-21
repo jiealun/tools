@@ -43,6 +43,28 @@ export default function AdminDashboard() {
     setProducts(res.data || [])
   }
 
+  async function deleteProduct(id: string, name: string) {
+    if (!confirm(`确定删除「${name}」？`)) return
+    await fetchAPI(`/api/admin/products/${id}`, { method: 'DELETE' })
+    loadProducts()
+    loadStats()
+  }
+
+  async function duplicateProduct(product: Product) {
+    const res = await fetchAPI(`/api/admin/products/${product.id}`)
+    const detail = res.data
+    if (!detail) return
+    // 创建副本，去掉 id 等唯一字段
+    const { id, download_count, created_at, updated_at, ...rest } = detail
+    const newProduct = { ...rest, name: `${product.name} (副本)`, is_published: false }
+    await fetchAPI('/api/admin/products', {
+      method: 'POST',
+      body: JSON.stringify(newProduct),
+    })
+    loadProducts()
+    loadStats()
+  }
+
   const filteredProducts = search
     ? products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
     : products
@@ -57,6 +79,9 @@ export default function AdminDashboard() {
             <h1 className="text-lg font-bold">彩虹工具箱后台</h1>
           </div>
           <div className="flex items-center gap-4">
+            <Link to="/admin/support" className="text-sm text-blue-600 hover:text-blue-800">
+              客服工作台
+            </Link>
             <Link to="/" className="text-sm text-gray-500 hover:text-gray-900">
               查看前台
             </Link>
@@ -69,7 +94,7 @@ export default function AdminDashboard() {
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* 统计卡片 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="bg-white p-4 rounded-xl border">
             <p className="text-sm text-gray-500">产品总数</p>
             <p className="text-2xl font-bold mt-1">{stats?.totalProducts || 0}</p>
@@ -77,14 +102,6 @@ export default function AdminDashboard() {
           <div className="bg-white p-4 rounded-xl border">
             <p className="text-sm text-gray-500">总下载量</p>
             <p className="text-2xl font-bold mt-1">{stats?.totalDownloads || 0}</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl border">
-            <p className="text-sm text-gray-500">激活码总数</p>
-            <p className="text-2xl font-bold mt-1">{stats?.totalCodes || 0}</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl border">
-            <p className="text-sm text-gray-500">已使用</p>
-            <p className="text-2xl font-bold mt-1">{stats?.usedCodes || 0}</p>
           </div>
         </div>
 
@@ -129,6 +146,8 @@ export default function AdminDashboard() {
                   <div className="flex gap-3 text-xs">
                     <Link to={`/admin/products/${p.id}/codes`} className="text-blue-500">激活码</Link>
                     <Link to={`/admin/products/${p.id}`} className="text-gray-500">编辑</Link>
+                    <button onClick={() => duplicateProduct(p)} className="text-blue-500">复制</button>
+                    <button onClick={() => deleteProduct(p.id, p.name)} className="text-red-500">删除</button>
                   </div>
                 </div>
               ))}
@@ -162,6 +181,8 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-4 py-3 text-right space-x-2">
                       <Link to={`/admin/products/${p.id}`} className="text-gray-500 hover:underline">编辑</Link>
+                      <button onClick={() => duplicateProduct(p)} className="text-blue-500 hover:underline">复制</button>
+                      <button onClick={() => deleteProduct(p.id, p.name)} className="text-red-500 hover:underline">删除</button>
                     </td>
                   </tr>
                 ))}

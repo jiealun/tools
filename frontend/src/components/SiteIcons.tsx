@@ -59,3 +59,19 @@ export function ImageIcon(props: IconProps) {
 export function DocumentIcon(props: IconProps) {
   return <svg {...lineIconProps} {...props}><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" /><path d="M14 3v5h4M9 13h6M9 17h4" /></svg>
 }
+
+export function ChatIcon(props: IconProps) {
+  return <svg {...lineIconProps} {...props}><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3h9A2.5 2.5 0 0 1 19 5.5v6a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 3v-3.15A2.5 2.5 0 0 1 5 11.5v-6Z" /><path d="M8.5 8.5h7M8.5 11h4" /></svg>
+}
+
+export function PaperclipIcon(props: IconProps) {
+  return <svg {...lineIconProps} {...props}><path d="m9.25 12.75 5.7-5.7a3.18 3.18 0 0 1 4.5 4.5l-6.86 6.86a4.5 4.5 0 0 1-6.36-6.36l6.38-6.38a2.9 2.9 0 0 1 4.1 4.1l-6.04 6.04a1.45 1.45 0 0 1-2.05-2.05l5.44-5.44" /></svg>
+}
+
+export function SendIcon(props: IconProps) {
+  return <svg {...lineIconProps} {...props}><path d="m21 3-7.5 18-3.2-7.3L3 10.5 21 3Z" /><path d="m10.3 13.7 4.2-4.2" /></svg>
+}
+
+export function CloseIcon(props: IconProps) {
+  return <svg {...lineIconProps} {...props}><path d="m6 6 12 12M18 6 6 18" /></svg>
+}
